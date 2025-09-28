@@ -23,15 +23,17 @@ jobs:
 
       - name: Read version from .env
         id: env
-        run: echo "::set-output name=PRODUCTION_BUILD_VERSION::$(grep ^PRODUCTION_BUILD_VERSION= .env | cut -d'=' -f2)"
+        run: |
+          echo "::set-output name=PRODUCTION_BUILD_VERSION::$(grep ^PRODUCTION_BUILD_VERSION= .env | cut -d'=' -f2)"
+          echo "::set-output name=REPOSITORY_OWNER::$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')"
 
       - name: Build the Docker image for latest
-        run: docker build -f ./.docker/Dockerfile_production -t ghcr.io/${{ github.repository_owner }}/tweb:latest .
+        run: docker build -f ./.docker/Dockerfile_production -t ghcr.io/${{ steps.env.outputs.REPOSITORY_OWNER }}/tweb:latest .
 
       - name: Build the Docker image for specific version
         run: |
           version=${{ steps.env.outputs.PRODUCTION_BUILD_VERSION }}
-          docker build -f ./.docker/Dockerfile_production -t ghcr.io/${{ github.repository_owner }}/tweb:${version} .
+          docker build -f ./.docker/Dockerfile_production -t ghcr.io/${{ steps.env.outputs.REPOSITORY_OWNER }}/tweb:${version} .
 
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -39,11 +41,11 @@ jobs:
       - name: Push versioned image
         run: |
           version=${{ steps.env.outputs.PRODUCTION_BUILD_VERSION }}
-          docker push ghcr.io/${{ github.repository_owner }}/tweb:${version}
+          docker push ghcr.io/${{ steps.env.outputs.REPOSITORY_OWNER }}/tweb:${version}
 
       - name: Push latest image
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/tweb:latest
+          docker push ghcr.io/${{ steps.env.outputs.REPOSITORY_OWNER }}/tweb:latest
 
 
   test:
@@ -56,12 +58,14 @@ jobs:
 
       - name: Read version from .env
         id: env
-        run: echo "::set-output name=PRODUCTION_BUILD_VERSION::$(grep ^PRODUCTION_BUILD_VERSION= .env | cut -d'=' -f2)"
+        run: |
+          echo "::set-output name=PRODUCTION_BUILD_VERSION::$(grep ^PRODUCTION_BUILD_VERSION= .env | cut -d'=' -f2)"
+          echo "::set-output name=REPOSITORY_OWNER::$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')"
 
       - name: Pull versioned image
         run: |
           version=${{ steps.env.outputs.PRODUCTION_BUILD_VERSION }}
-          docker pull ghcr.io/${{ github.repository_owner }}/tweb:${version}
+          docker pull ghcr.io/${{ steps.env.outputs.REPOSITORY_OWNER }}/tweb:${version}
 
       - name: Pull latest image
-        run: docker pull ghcr.io/${{ github.repository_owner }}/tweb:latest
+        run: docker pull ghcr.io/${{ steps.env.outputs.REPOSITORY_OWNER }}/tweb:latest
