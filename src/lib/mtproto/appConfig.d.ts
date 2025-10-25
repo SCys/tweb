@@ -118,6 +118,12 @@ export interface MTAppConfig {
   stargifts_convert_period_max?:             number;
   stargifts_message_length_max?:             number;
   stargifts_pinned_to_top_limit?:            number;
+  stars_suggested_post_age_min?:             number;
+  stars_suggested_post_amount_max?:          number;
+  stars_suggested_post_amount_min?:          number;
+  stars_suggested_post_commission_permille?: number;
+  stars_suggested_post_future_max?:          number;
+  stars_suggested_post_future_min?:          number;
   web_app_allowed_protocols?:                string[];
   todo_item_length_max?:                     number;
   todo_items_max?:                           number;
@@ -137,6 +143,9 @@ export interface MTAppConfig {
   channel_autotranslation_level_min?:         number;
   translations_auto_enabled?:                 'enabled' | 'disabled';
   translations_manual_enabled?:               'enabled' | 'disabled';
+  freeze_since_date?:                         number;
+  freeze_until_date?:                         number;
+  freeze_appeal_url?:                         string;
 }
 
 export interface EmojiesSendDiceSuccess {

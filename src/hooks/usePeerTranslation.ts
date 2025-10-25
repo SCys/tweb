@@ -19,6 +19,10 @@ function _usePeerTranslation(peerId: PeerId) {
   const isPremium = usePremium();
 
   const areTranslationsAvailable = (manual?: boolean) => {
+    if(appState.appConfig.freeze_since_date) {
+      return false;
+    }
+
     const appConfig = appState?.appConfig;
     if((manual ? appConfig?.translations_manual_enabled : appConfig?.translations_auto_enabled) !== 'enabled') {
       return false;
@@ -44,8 +48,9 @@ function _usePeerTranslation(peerId: PeerId) {
       return;
     }
 
+    const _fullPeer = fullPeer();
     if(
-      fullPeer().pFlags.translations_disabled ||
+      (!_fullPeer || _fullPeer.pFlags.translations_disabled) ||
       appSettings.translations.doNotTranslate.includes(peerLanguage())
     ) {
       return false;
