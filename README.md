@@ -1,50 +1,51 @@
 ## Telegram Web K
-Based on Webogram, patched and improved. Available for everyone here: https://web.telegram.org/k/
+基于 Webogram，经过修补和改进。在这里为所有人提供：https://web.telegram.org/k/
 
 
-### Developing
-Install dependencies with:
+### 开发
+安装依赖：
 ```lang=bash
 pnpm install
 ```
-This will install all the needed dependencies.
+这将安装所有必需的依赖项。
 
 
-#### Running web-server
-Just run `pnpm start` to start the web server and the livereload task.
-Open http://localhost:8080/ in your browser.
+#### 运行 Web 服务器
+只需运行 `pnpm start` 来启动 Web 服务器和热重载任务。
+在浏览器中打开 http://localhost:8080/。
 
 
-#### Running in production
+#### 生产环境运行
 
-Run `node build` to build the minimized production version of the app. Copy `public` folder contents to your web server.
+运行 `node build` 来构建应用的最小化生产版本。将 `public` 文件夹内容复制到您的 Web 服务器。
 
-### Running in docker
+### 在 Docker 中运行
 
-#### Developing: 
-* Install dependencies `docker-compose up tweb.dependencies`.
-* Run develop container `docker-compose up tweb.develop `.
-* Open http://localhost:8080/ in your browser. 
+#### 开发环境：
+* 安装依赖 `docker-compose up tweb.dependencies`。
+* 运行开发容器 `docker-compose up tweb.develop`。
+* 在浏览器中打开 http://localhost:8080/。
 
-#### Production:
-* Run `docker-compose up tweb.production -d` nginx image and container to serve the build
-* Open http://localhost:80/ in your browser.
+#### 生产环境：
+* 运行 `docker-compose up tweb.production -d` nginx 镜像和容器来提供构建服务
+* 在浏览器中打开 http://localhost:80/。
 
 
-I also created an image https://hub.docker.com/r/elgammalx/tweb/tags  based on Nginx ready to be deployed.
+我还创建了一个基于 Nginx 的镜像 https://hub.docker.com/r/elgammalx/tweb/tags，可以直接部署。
 
-You can use `docker build -f ./.docker/Dockerfile_production -t {dockerhub-username}/{imageName}:{latest} .` to build your production ready image.
+您可以使用 `docker build -f ./.docker/Dockerfile_production -t {dockerhub-username}/{imageName}:{latest} .` 来构建您的生产就绪镜像。
 
-My build use in `docker-compose.yaml` file
+# 使用
+
 ```yaml
 services:
   tweb.production:
-    image: elgammalx/tweb
+    image: ghcr.io/scys/tweb:latest
     ports:
-      - 80:80
+      - 8080:80
 ```
 
-### Dependencies
+### 依赖项
 * [BigInteger.js](https://github.com/peterolson/BigInteger.js) ([Unlicense](https://github.com/peterolson/BigInteger.js/blob/master/LICENSE))
 * [pako](https://github.com/nodeca/pako) ([MIT License](https://github.com/nodeca/pako/blob/master/LICENSE))
 * [cryptography](https://github.com/spalt08/cryptography) ([Apache License 2.0](https://github.com/spalt08/cryptography/blob/master/LICENSE))
