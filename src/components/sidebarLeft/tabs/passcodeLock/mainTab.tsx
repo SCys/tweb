@@ -10,12 +10,10 @@ import {i18n, LangPackKey} from '../../../../lib/langPack';
 import {usePromiseCollector} from '../../../solidJsTabs/promiseCollector';
 import {useSuperTab} from '../../../solidJsTabs/superTabProvider';
 import type {AppPasscodeLockTab} from '../../../solidJsTabs';
-import confirmationPopup from '../../../confirmationPopup';
 import type SliderSuperTab from '../../../sliderTab';
 import ripple from '../../../ripple'; ripple; // keep
 import StaticSwitch from '../../../staticSwitch';
 import Section from '../../../section';
-import Row from '../../../rowTsx';
 import Space from '../../../space';
 
 import ShortcutBuilder, {ShortcutKey} from './shortcutBuilder';
@@ -137,7 +135,8 @@ const PasscodeSetContent: Component<{
 }> = (props) => {
   const [tab, {AppPasscodeEnterPasswordTab, AppPasscodeLockTab, AppPrivacyAndSecurityTab}] = useSuperTab<AppPasscodeLockTabType>();
   const {disablePasscode, changePasscode} = usePasscodeActions();
-  const {rootScope, setQuizHint} = useHotReloadGuard();
+  const {rootScope, setQuizHint, Row, useAppSettings, confirmationPopup} = useHotReloadGuard();
+  const [, setAppSettings] = useAppSettings();
 
   const options = [
     {value: 0, label: () => i18n('PasscodeLock.Disabled')},
@@ -181,17 +180,17 @@ const PasscodeSetContent: Component<{
 
   function setShortcutKeys(value: ShortcutKey[]) {
     mutateShortcutKeys(value);
-    rootScope.managers.appStateManager.setByKey(joinDeepPath('settings', 'passcode', 'lockShortcut'), value);
+    setAppSettings('passcode', 'lockShortcut', value);
   }
 
   function setShortcutEnabled(value: boolean) {
     mutateShortcutEnabled(value);
-    rootScope.managers.appStateManager.setByKey(joinDeepPath('settings', 'passcode', 'lockShortcutEnabled'), value);
+    setAppSettings('passcode', 'lockShortcutEnabled', value);
   }
 
   function setLockTimeout(value: number | null) {
     mutateLockTimeout(value);
-    rootScope.managers.appStateManager.setByKey(joinDeepPath('settings', 'passcode', 'autoLockTimeoutMins'), value);
+    setAppSettings('passcode', 'autoLockTimeoutMins', value);
   }
 
   onCleanup(() => {

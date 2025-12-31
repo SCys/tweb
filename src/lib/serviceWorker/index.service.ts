@@ -7,7 +7,7 @@
 import {logger, LogTypes} from '../logger';
 import {CACHE_ASSETS_NAME, requestCache} from './cache';
 import onStreamFetch, {toggleStreamInUse} from './stream';
-import {closeAllNotifications, fillPushObject, onPing, onPushClosedWindows, onShownNotification, resetPushAccounts} from './push';
+import {closeAllNotifications, fillPushObject, onPing, onShownNotification, resetPushAccounts} from './push';
 import CacheStorageController from '../files/cacheStorage';
 import {IS_SAFARI} from '../../environment/userAgent';
 import ServiceMessagePort from './serviceMessagePort';
@@ -138,6 +138,10 @@ serviceMessagePort.addMultipleEventsListeners({
     CacheStorageController.temporarilyToggle(enabled);
   },
 
+  resetEncryptableCacheStorages: () => {
+    CacheStorageController.resetOpenEncryptableCacheStorages();
+  },
+
   toggleUsingPasscode: (payload) => {
     DeferredIsUsingPasscode.resolveDeferred(payload.isUsingPasscode);
     EncryptionKeyStore.save(payload.encryptionKey);
@@ -157,7 +161,8 @@ const {
 
 // * service worker can be killed, so won't get 'hello' event
 getWindowClients().then((windowClients) => {
-  log(`got ${windowClients.length} windows from the start`);
+  const length = windowClients.length;
+  log(`got ${length} windows from the start`);
   windowClients.forEach((windowClient) => {
     onWindowConnected(windowClient);
   });
@@ -199,7 +204,6 @@ listenMessagePort(serviceMessagePort, undefined, (source) => {
       _cryptoMessagePort = undefined;
     }
 
-    onPushClosedWindows();
     onDownloadClosedWindows();
   }
 });

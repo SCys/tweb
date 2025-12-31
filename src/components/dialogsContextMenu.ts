@@ -22,15 +22,14 @@ import createContextMenu from '../helpers/dom/createContextMenu';
 import PopupElement from './popups';
 import cancelEvent from '../helpers/dom/cancelEvent';
 import IS_SHARED_WORKER_SUPPORTED from '../environment/sharedWorkerSupport';
-import wrapEmojiText from '../lib/richTextProcessor/wrapEmojiText';
 import appImManager from '../lib/appManagers/appImManager';
-import assumeType from '../helpers/assumeType';
 import {isDialog, isForumTopic, isMonoforumDialog, isSavedDialog} from '../lib/appManagers/utils/dialogs/isDialog';
-import createSubmenuTrigger from './createSubmenuTrigger';
+import createSubmenuTrigger, {CreateSubmenuArgs} from './createSubmenuTrigger';
 import type AddToFolderDropdownMenu from './addToFolderDropdownMenu';
 import memoizeAsyncWithTTL from '../helpers/memoizeAsyncWithTTL';
 import {MonoforumDialog} from '../lib/storages/monoforumDialogs';
 import {openRemoveFeePopup} from './chat/removeFee';
+import apiManagerProxy from '../lib/mtproto/mtprotoworker';
 
 
 export default class DialogsContextMenu {
@@ -60,6 +59,11 @@ export default class DialogsContextMenu {
         this.peerId = li.dataset.peerId.toPeerId();
         this.threadId = +li.dataset.threadId || undefined;
         this.monoforumParentPeerId = +li.dataset.monoforumParentPeerId || undefined;
+
+        if(li.dataset.isAllChats) {
+          throw {};
+        }
+
         this.dialog = this.monoforumParentPeerId ?
           await this.managers.monoforumDialogsStorage.getDialogByParent(this.monoforumParentPeerId, this.peerId):
           await this.managers.dialogsStorage.getAnyDialog(this.peerId, this.threadId);
@@ -210,7 +214,7 @@ export default class DialogsContextMenu {
       text: 'CloseTopic',
       onClick: this.onToggleTopicClick,
       verify: () => {
-        return this.canManageTopics && !(this.dialog as ForumTopic.forumTopic).pFlags.closed;
+        return !apiManagerProxy.isBotforum(this.peerId) && this.canManageTopics && !(this.dialog as ForumTopic.forumTopic).pFlags.closed;
       }
     }, {
       icon: 'lockoff',
@@ -240,15 +244,19 @@ export default class DialogsContextMenu {
     return this.buttons = this.buttons.filter(Boolean);
   }
 
-  private createAddToFolderSubmenu = async() => {
+  private createAddToFolderSubmenu = async({middleware}: CreateSubmenuArgs) => {
     if(!isDialog(this.dialog)) return;
 
     const {default: AddToFolderDropdownMenu, fetchDialogFilters} = await import('./addToFolderDropdownMenu');
 
+    const filters = await fetchDialogFilters();
+
+    if(!middleware()) return;
+
     const menu = new AddToFolderDropdownMenu;
     menu.feedProps({
       dialog: this.dialog,
-      filters: await fetchDialogFilters(),
+      filters,
       currentFilter: () => appDialogsManager.filterId,
       onNewDialog: (dialog) => {
         this.dialog = dialog;
